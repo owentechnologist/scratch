@@ -22,6 +22,8 @@ except redis.exceptions.ConnectionError as e:
         print("Could not connect to Redis server.")
         raise e
 
+verbose = False
+
 myredis.delete('bulktest') # setup for clean test... < deletes this graph key if it exists
 
 # Create graph key:
@@ -36,12 +38,13 @@ baseSignalStrength = 1
 baseFailureCount = 0
 channelBase = 7
 
-for x in range(100):
+    
+for x in range(10000):
     params = {'dID':x+baseDeviceID,'cID':((x+channelBase)%3)}
     query = "MERGE (d:Device {id: $dID}) MERGE (c:Channel {id: $cID}) MERGE (d)-[rel:BELONGS_TO]->(c) RETURN 1 "
     result = redis_graph.query(query,params)
     x = (x+1)
-    if(x % 50 == 0):
+    if(x % 5000 == 0):
         print(f"How many queries executed? {x}")
 
 """
@@ -55,31 +58,62 @@ DeviceID,SignalFrequency,SignalStrength,FailureCount
 #batch_query = "MATCH (d:Device {id: $dID}) SET (d.) RETURN 1 "
 batch_query = "MATCH (d:Device {id: row[0]}) SET d.SignalFrequency = row[1], d.SignalStrength = row[2], d.FailureCount = row[3] RETURN d"
 querybase = " ".join(["UNWIND $rows AS", "row", batch_query])
-print(f"querybase looks like:\n\n{querybase}\n")
+print(f"\nquerybase looks like:\n\n{querybase}\n")
 rows_wrap = []
-for r in range(3):
-    # program the row of data to be added to the batch and processed:
-    data_row = f"['{baseDeviceID}','{baseSignalFreq}','{baseSignalStrength}','{baseFailureCount}']"
-    print(f"data_row looks like this: {data_row}\n")
-    print(f"data_row can be seen as a list which contains [{data_row.count('100')}] instances of the value: '100'")
-    row = ",".join([quote_string(cell) for cell in literal_eval(data_row)])
-    print(f"row looks like this: {row}\n")
-    next_line = "".join(["[", row.strip(), "]"])
-    print(f"next_line looks like this: {next_line}\n")
-    rows_wrap.append(next_line)
-    # modify our properties before repeating the loop:
-    baseDeviceID = baseDeviceID+1
-    baseSignalFreq = 10*r
-    baseSignalStrength = r%3
-    baseFailureCount = r%4
 
-rows = "".join(["CYPHER rows=[", ",".join(rows_wrap), "]"])
-command = " ".join([rows, querybase])
+ts1 = myredis.time() # timestamp1
 
-print(f"our query now looks like this: \n{command}")
+#keep track of the updates we send to RedisGraph:
+totalUpdates = 0
+trange = 2
+rrange = 1000
+print("\n\nBeginning batch updates...\n\n")
 
-# Execute our command:
-redis_graph.query(command)
+for up in range(trange):
+    for r in range(rrange):
+        # program the row of data to be added to the batch and processed:
+        data_row = f"['{baseDeviceID}','{baseSignalFreq}','{baseSignalStrength}','{baseFailureCount}']"
+        if(verbose):
+            print(f"data_row looks like this: {data_row}\n")
+            print(f"data_row can be seen as a list which contains [{data_row.count('100')}] instances of the value: '100'")
+        row = ",".join([quote_string(cell) for cell in literal_eval(data_row)])
+        if(verbose):
+            print(f"row looks like this: {row}\n")
+        next_line = "".join(["[", row.strip(), "]"])
+        if(verbose):
+            print(f"next_line looks like this: {next_line}\n")
+        rows_wrap.append(next_line)
+        # modify our properties before repeating the loop:
+        baseDeviceID = baseDeviceID+totalUpdates+1
+        baseSignalFreq = 10*r
+        baseSignalStrength = r%3
+        baseFailureCount = r%4
+        r = r+1
+
+    up = up+1
+    print(f"up counter is now: {up}")
+
+    rows = "".join(["CYPHER rows=[", ",".join(rows_wrap), "]"])
+    command = " ".join([rows, querybase])
+
+    if(verbose):
+        print(f"our query now looks like this: \n{command}")
+
+    # Execute our command:
+    redis_graph.query(command)
+
+#End parent loop
+
+
+totalUpdates = up * r
+ts2 = myredis.time() # timestamp1
+timestart = ts1[0]
+timeend = ts2[0]
+durationsecs = timeend-timestart
+rate = totalUpdates/durationsecs
+print('Executed '+str(totalUpdates)+' updates in '+str(durationsecs)+' seconds')
+print('Execution Rate == '+str(rate))
+
 testquery = """GRAPH.QUERY "bulktest" "MATCH (x) WHERE x.id < 64579404 return x"""
 print(f"\n\nUSE REDIS-CLI or RedisInsight and issue the following query to see the modified nodes:  {testquery}")
 
