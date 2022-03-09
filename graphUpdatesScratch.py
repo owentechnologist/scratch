@@ -3,11 +3,20 @@ from redisgraph import Node, Edge, Graph, Path
 from ast import literal_eval
 from sys import argv
 
-createGraph = False
+# Edit the next 2 variable values to match your redis deployment:
+redis_host = '192.168.1.6'
+redis_port = 10009 
+
+# edit this value to True if you want to see every string manipulation as query is constructed:
 verbose = False
-batchSize = 1000
+
+# the following default values will be adjusted by user through prompts during runtime:
+createGraph = False
+batchSize = 2000
 iterations = 5
 shouldIndex = False
+
+
 
 inarg = input("Should I create a new Graph? (y or n) ")
 if(inarg == 'y'):
@@ -29,17 +38,17 @@ def quote_string(cell):
         float(cell) # Check for numeric
     except ValueError:
         if ((cell.lower() != 'false' and cell.lower() != 'true') and # Check for boolean
-                (cell[0] != '[' and cell.lower != ']') and # Check for array
-                (cell[0] != "\"" and cell[-1] != "\"") and # Check for double-quoted string
-                (cell[0] != "\'" and cell[-1] != "\'")): # Check for single-quoted string
-                cell = "".join(["\"", cell, "\""])
+            (cell[0] != '[' and cell.lower != ']') and # Check for array
+            (cell[0] != "\"" and cell[-1] != "\"") and # Check for double-quoted string
+            (cell[0] != "\'" and cell[-1] != "\'")): # Check for single-quoted string
+            cell = "".join(["\"", cell, "\""])
     return cell
 
-try: #graph on port 10007 no persist/no replication graph on port 10009 has persist and replication
-    myredis = redis.Redis( host='192.168.1.6', port=10009) 
+try: 
+    myredis = redis.Redis( host=redis_host, port=redis_port) 
 except redis.exceptions.ConnectionError as e:
-        print("Could not connect to Redis server.")
-        raise e
+    print(f"Could not connect to Redis server at {redis_host}:{str(redis_port)}")
+    raise e
 
 if(createGraph): 
     myredis.delete('bulktest') # setup for clean test... < deletes this graph key if it exists
