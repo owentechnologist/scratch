@@ -17,9 +17,9 @@ if(inarg == 'y'):
     if(inarg2 == 'y'):
         shouldIndex = True
 
-batchSize = int(input("how big a batch Size do you want? eg: 500  "))
+batchSize = int(input("how big a batch Size do you want? eg: 2000  "))
 
-iterations = int(input("how many times should we execute the batch? eg: 4  "))
+iterations = int(input("how many times should we execute the batch? eg: 5  "))
 
 # stolen from: 
 # https://github.com/RedisGraph/redisgraph-bulk-loader/blob/master/redisgraph_bulk_loader/bulk_update.py
