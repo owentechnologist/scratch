@@ -35,8 +35,8 @@ def quote_string(cell):
                 cell = "".join(["\"", cell, "\""])
     return cell
 
-try: 
-    myredis = redis.Redis( host='192.168.1.6', port=10007)
+try: #graph on port 10007 no persist/no replication graph on port 10009 has persist and replication
+    myredis = redis.Redis( host='192.168.1.6', port=10009) 
 except redis.exceptions.ConnectionError as e:
         print("Could not connect to Redis server.")
         raise e
@@ -76,8 +76,7 @@ if(shouldIndex):
     redis_graph.query(indexCommand)
 
 # prepare batch_query:
-#batch_query = "MATCH (d:Device {id: $dID}) SET (d.) RETURN 1 "
-batch_query = "MATCH (d:Device {id: row[0]}) SET d.SignalFrequency = row[1], d.SignalStrength = row[2], d.FailureCount = row[3] RETURN d"
+batch_query = "MATCH (d:Device {id: row[0]}) SET d.SignalFrequency = row[1], d.SignalStrength = row[2], d.FailureCount = row[3] RETURN 1"
 querybase = " ".join(["UNWIND $rows AS", "row", batch_query])
 print(f"\nquerybase looks like:\n\n{querybase}\n")
 rows_wrap = []
