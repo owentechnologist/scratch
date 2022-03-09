@@ -34,9 +34,9 @@ if(inarg2 == 'y'):
     shouldIndex = True
     print(f"shouldIndex = {shouldIndex}")
     
-print("We are going to update many Device node properties ... this will be done in batches ")    
-batchSize = int(input("how many Device node updates do you want to do in a single batch? eg: 2000  "))
-iterations = int(input("how many times should we execute the update batch? eg: 5  "))
+print("\nWe are going to update many Device node properties ... this will be done in batches ")    
+batchSize = int(input("--how many Device node updates do you want to do in a single batch? eg: 2000  "))
+iterations = int(input("--how many times should we execute the update batch? eg: 5  "))
 print(f"\nYou have elected to update the properties of {iterations*batchSize} nodes!\n")
 
 # stolen from: 
@@ -140,7 +140,7 @@ if(shouldIndex):
 # prepare batch_query:
 batch_query = "MATCH (d:Device {id: row[0]}) SET d.SignalFrequency = row[1], d.SignalStrength = row[2], d.FailureCount = row[3] RETURN 1"
 querybase = " ".join(["UNWIND $rows AS", "row", batch_query])
-print(f"\nquerybase looks like:\n\n{querybase}\n")
+print(f"\nquerybase looks like:\n{querybase}")
 rows_wrap = []
 
 ts1 = myredis.time() # timestamp1
@@ -149,7 +149,7 @@ ts1 = myredis.time() # timestamp1
 totalUpdates = 0
 trange = iterations
 rrange = batchSize
-print("\n\nBeginning batch updates...\n\n")
+print("\n... Beginning batch updates...\n\n")
 
 printFlag = False
 device_id = baseDeviceID
