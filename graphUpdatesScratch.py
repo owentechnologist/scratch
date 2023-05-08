@@ -1,12 +1,12 @@
-from os import device_encoding
 import redis, time, sys
 from redisgraph import Node, Edge, Graph, Path
-from ast import literal_eval
-from sys import argv
 
 # Edit the next 2 variable values to match your redis deployment:
-redis_host = '192.168.1.6'
-redis_port = 10009 
+redis_host = '192.168.1.21'
+redis_port = 14787 
+#redis_host = 'localhost'
+#redis_port = 6379 
+
 
 # edit this value to True if you want to see every string manipulation as query is constructed:
 verbose = False
@@ -29,6 +29,7 @@ if(inarg == 'y'):
     if(num_device_nodes>500000):
         print(f"\n\n{num_device_nodes} is a huge number for a simple single threaded script like me... \nchanging to 500000\n\n")
         num_device_nodes=500000
+
 inarg2 = input("Should I add an index for the nodes? (y or n) ")
 if(inarg2 == 'y'):
     shouldIndex = True
@@ -84,6 +85,13 @@ UNWIND $rows AS row MATCH (d:Device {id: row[0]})
 SET d.SignalFrequency = row[1], d.SignalStrength = row[2], d.FailureCount = row[3] 
 RETURN 1
 """
+
+if(shouldIndex):
+    indexCommand = "CREATE INDEX ON :Device(id)"
+    redis_graph.query(indexCommand)
+    indexCommand = "CREATE INDEX ON :Channel(id)"
+    redis_graph.query(indexCommand)
+
 # kept slow version for comparison but don't expect to use it once batch load works
 want_slow=False
 
@@ -91,13 +99,16 @@ want_slow=False
 if(createGraph) and (want_slow==False):
     # break up inserts into batches of 1000:
     # ( we also use total_batches to determine number of channels for devices )
-    total_batches = round((num_device_nodes/500))
+    total_batches = round((num_device_nodes/1000))
     rows_array = [] 
     printFlag = True
     for c in range(total_batches):
         print(f"\nRound {c} of batch inserts about to happen...\n\n")
         # establish query template for inserts:
-        bquery = "UNWIND $rows AS row CREATE (d:Device  {id: row[0]}) WITH d,row MERGE (c:Channel {id: row[1]}) MERGE (d)-[rel:BELONGS_TO]->(c) RETURN 1"
+        # good bquery = "UNWIND $rows AS row CREATE (d:Device  {id: row[0]}) WITH d,row MERGE (c:Channel {id: row[1]}) MERGE (d)-[rel:BELONGS_TO]->(c) RETURN 1"
+        # experimental query follows:
+        # UNWIND $rows AS row MERGE (p:updateTest{name: row[0]}) ON CREATE SET p.val=row[1] ON MATCH SET p.val=row[1]
+        bquery = "UNWIND $rows AS row MERGE (d:Device  {id: row[0]}) ON CREATE SET d.channelid=row[1] ON MATCH SET d.dummyid=row[1] RETURN 1"
         # build rows to be later unwound:        
         insert_batchSize=int(num_device_nodes/total_batches)
         for i in range(insert_batchSize):
@@ -131,11 +142,7 @@ DeviceID,SignalFrequency,SignalStrength,FailureCount
 [1287634683, 22, 4, 1]
 
 """
-if(shouldIndex):
-    indexCommand = "CREATE INDEX ON :Device(id)"
-    redis_graph.query(indexCommand)
-    indexCommand = "CREATE INDEX ON :Channel(id)"
-    redis_graph.query(indexCommand)
+
 
 # prepare batch_query:
 batch_query = "MATCH (d:Device {id: row[0]}) SET d.SignalFrequency = row[1], d.SignalStrength = row[2], d.FailureCount = row[3] RETURN 1"
@@ -203,5 +210,5 @@ print('Executed '+str(totalUpdates)+' updates in '+str(durationsecs)+' seconds')
 print('Execution Rate == '+str(rate))
 
 testquery = f"GRAPH.QUERY 'bulktest' 'MATCH (x)--(y) WHERE x.id < {baseDeviceID+(iterations*batchSize)}  return x,y ORDER BY x.id DESC limit 300'"
-print(f"\n\nUSE REDIS-CLI or RedisInsight and issue the following query to see the modified nodes:  {testquery}")
+print(f"\n\nUSE REDIS-CLI or RedisInsight and issue the following query to see the modified nodes:\n{testquery}")
 
