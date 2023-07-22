@@ -7,7 +7,7 @@ import redis,sys
 # 2) the number of keys to be added
 
 # TODO: fix the host and port to match your redis database endpoint:
-redis_proxy = redis.Redis(host='redis-18031.mc290-0.us-central1-mz.gcp.cloud.rlrcp.com', port=18031, password='C2iadH1haCAk1zrHKongj2nLwYrI0GvzdMn', decode_responses=True)
+redis_proxy = redis.Redis(host='redis-18031.mc290-0.us-central1-mz.gcp.cloud.rlrcp.com', port=18031, password='C2iadH1haCAk1zrHKj2nLwYrI0GvzdMn', decode_responses=True)
 
 # add the keys in Redis that match the provided prefix: 
 def add_keys_to_redis(target_prefix,number_of_keys):
