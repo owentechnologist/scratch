@@ -59,7 +59,7 @@ except redis.exceptions.ResponseError as rex:
 # "machineid":"MID892209121212902",
 # "results":[{"a":456,"b":787},{"a":32501,"b":787},{"a":2981,"b":9663}]}'}]}
 
-print('\nThis next set of results showcases using the returned fields of the search API to fetch data that is not indexed\n'+
+print('\nThis next set of results showcases using the returned fields of the search API to fetch attributes that are not indexed\n'+
       'The filter used is a time-range using two timestamps to define the range\n')
 
 searchResults = r.ft(idx).search(Query("@timecap:[1426300000000,1426459000000]").return_field("$.testID", as_field="testID").return_field("$.results[0].a", as_field="firstAResult"))
