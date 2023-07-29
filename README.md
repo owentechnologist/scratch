@@ -20,7 +20,7 @@ On windows you would do:
 venv\Scripts\activate
 ```
 
-3. Add this requirements.txt to the project:
+3. Python will utilize this requirements.txt in the project:
 
 ```
 redis>=4.3.4
