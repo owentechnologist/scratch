@@ -46,5 +46,6 @@ python3 simplejsonsearch.py 
 deactivate
 ```
 
-
+useful link to python docs for redis:
+https://redis.readthedocs.io/en/stable/redismodules.html 
 
