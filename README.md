@@ -38,7 +38,7 @@ pip3 install -r requirements.txt
 python3 simplejsonsearch.py 
 ```
 
-6. If you get errors it is most likely because you haven't configured the host and port and or username and password to your redis server
+6. If you get errors it is most likely because you haven't configured the host and port and or username and password to your redis server (each example expects you to modify the code to provide these things)
 
 7. when you are done exploring this set of examples you can deactivate the virtual environment:
 
