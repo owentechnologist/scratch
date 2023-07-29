@@ -8,7 +8,7 @@ Simple python code tests of various things I am learning/testing.
 python3 -m venv venv 
 ```
 
-2. Activate it:
+2. Activate it:  [This step is repeated anytime you want this venv back]
 
 ```
 source venv/bin/activate
@@ -26,7 +26,7 @@ venv\Scripts\activate
 redis>=4.3.4
 ```
 
-4. Run:
+4. Run: [this step is repeated anytime you want this venv]
 
 ```
 pip3 install -r requirements.txt
