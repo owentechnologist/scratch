@@ -19,8 +19,8 @@ from redis.commands.search.result import Result
 
 # TODO: fix the host and port and password to match your redis database endpoint:
 
-r = redis.Redis(host='redis-12076.c60.us-west-1-2.ec2.cloud.redislabs.com', port=12076, password='XC8U71XnwGgSVEUXtGp25ZXI3x0NcDHT=', decode_responses=True)
-
+#r = redis.Redis(host='redis-12076.c60.us-west-1-2.ec2.cloud.redislabs.com', port=12076, password='XC8U71XnwGgSVEUXtGp25ZXI3x0NcDHT=', decode_responses=True)
+r = redis.Redis(host='redis-14154.homelab.local', port=14154, decode_responses=True)
 # define the name for the Search Index:
 idx = 'idx_srvc'
 
