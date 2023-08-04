@@ -49,3 +49,6 @@ deactivate
 useful link to python docs for redis:
 https://redis.readthedocs.io/en/stable/redismodules.html 
 
+Sequence Diagram for lockoutServiceClient.py:
+![sequencelock](lockingThoughts.png)
+
