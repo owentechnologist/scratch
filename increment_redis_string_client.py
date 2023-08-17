@@ -37,7 +37,7 @@ if __name__ == "__main__":
             try:
                 counter_val = redis_proxy.incr(target_keyname)
                 counter = counter_val
-            except redis.exceptions.ResponseError as err:
+            except redis.exceptions.ConnectionError as err:
                 print(f'incr({target_keyname}) ... {err} \n LAST KNOWN COUNTER: {counter}')
                 exit(1)    
         print(f'HEALTHY EXIT... LAST KNOWN COUNTER_VAL: {counter}')
