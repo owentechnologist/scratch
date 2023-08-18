@@ -8,6 +8,14 @@ import redis,sys,time
 # python3 increment_redis_string_client.py <string_keyname> <loop_size> <counter_value> <host> <port> <passwrd> <username>
 ## ex:
 # python3 increment_redis_string_client.py incrk1 1000 1385
+## If using this client to test AA failure scenarios you can:
+# # run a simple lua script to crash the Redis instance of choice:
+# EVAL "for index = 1,10000000 do redis.call('SCAN',0,'MATCH','*','COUNT','100000') end" 0
+# When the AA instance stops responding you can use the command line tools to kill any shards it holds 
+## <secret_util_command> stop_shards uids=1 force=yes
+## When all is shutdown - reverse the process:
+## <secret_util_command> start_shards uids=1
+# while the above is happening - switch your client to the peer instance of the AA DB
 
 if __name__ == "__main__":
     # TODO: pass in args or edit the host and port to match your redis database endpoint:
