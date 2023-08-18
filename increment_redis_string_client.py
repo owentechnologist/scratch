@@ -11,7 +11,12 @@ import redis,sys,time
 
 if __name__ == "__main__":
     # TODO: pass in args or edit the host and port to match your redis database endpoint:
-    redis_proxy = redis.Redis(host='192.168.1.20', port=10150, password='', decode_responses=True)
+    try:
+        redis_proxy = redis.Redis(host='197.168.1.20', port=10150, password='', decode_responses=True)
+        redis_proxy.ping('ping')
+    except:
+        print(f'You may need to provide command line arguments for your host and port etc...')
+    
     if len(sys.argv)>1:
         target_keyname = sys.argv[1]
         print(f'... using {target_keyname} as a lock.')
